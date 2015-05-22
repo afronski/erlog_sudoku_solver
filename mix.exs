@@ -16,7 +16,7 @@ defmodule ErlogSudokuSolver.Mixfile do
 
   defp deps do
     [
-        {:erlog, github: "rvirding/erlog"}
+        {:erlog, github: "rvirding/erlog", branch: "develop"}
     ]
   end
 end
