@@ -1,12 +1,31 @@
 defmodule ErlogSudokuSolver do
-  def solve(_board) do
+  def solve(board) do
+    createSolver(board)
+
     {:ok, start} = :erlog.new
     {:ok, solver} = :erlog.consult("./lib/sudoku.pl", start)
 
-    # *TODO*: How to invoke `L = [ [_,4,2,_], [_,2,1,_], [4,_,_,2], [2,_,_,1] ], sudoku(L).` and receive back filled `L`?
-    case :erlog.prove({:append, [1], [2], { :solution }}, solver) do
+    case :erlog.prove({:solve, {:solution}}, solver) do
       {{:succeed, [ solution: solution ]}, _state} -> solution
-      :fail -> :no_solution
+      {:fail, _state} -> :no_solution
     end
   end
+
+  defp createSolver(board) do
+    File.rm("./lib/sudoku.pl")
+
+    solver_content = EEx.eval_file("./lib/sudoku.pl.eex", [ board: translate_board(board) ])
+    :ok = File.write("./lib/sudoku.pl", solver_content)
+  end
+
+  defp translate_board([ rowA, rowB, rowC, rowD ]) do
+    "[ [ #{translate_row(rowA)} ], [ #{translate_row(rowB)} ], [ #{translate_row(rowC)} ], [ #{translate_row(rowD)} ] ]"
+  end
+
+  defp translate_row([ a, b, c, d ]) do
+    " #{translate_cell(a)}, #{translate_cell(b)}, #{translate_cell(c)}, #{translate_cell(d)} "
+  end
+
+  defp translate_cell(:empty), do: "_"
+  defp translate_cell(number) when is_integer(number), do: number
 end
